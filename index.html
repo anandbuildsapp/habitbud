@@ -2,74 +2,414 @@
 <html lang="en">
 
 <head>
-  <base href="/"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker</title>
+    <meta name="description" content="A simple, distraction-free habit tracker.">
 
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <!-- Using Inter font for a clean, minimal look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
-  <!-- Primary SEO -->
-  <title>Habit Tracker - Build Better Habits Daily</title>
-  <meta name="description"
-    content="A simple habit tracker app focused on consistency, not streak pressure. Build better habits with a clean, minimal experience.">
-  <meta name="keywords"
-    content="habit tracker, daily habits, build habits, productivity app, habit tracking app, self improvement, habitbud">
-  <meta name="author" content="Anand A J">
-  <meta name="robots" content="index, follow">
+    <style>
+        /* --- CSS VARIABLES (Mapped from your Flutter AppColorScheme) --- */
+        :root {
+            --primary: #44d62c;
+            /* Muted Sage Green */
+            --primary-touch: #56d276;
+            /* Touch Effect */
+            --bg-color: #000000;
+            /* Pure Black */
+            --surface-color: #252527;
+            /* Secondary Container */
+            --secondary-fixed: #18181b;
+            /* Secondary Fixed */
+            --border-color: #3D3D3D;
+            /* On Secondary Container */
+            --text-main: #FFFFFF;
+            /* Pure White */
+            --text-muted: #B0B0B0;
+            /* Surface */
+            --error: #dc2b31;
+            /* Error */
+        }
 
-  <!-- Mobile / PWA -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Habit Tracker">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+        /* --- RESET & BASE STYLES --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png">
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
 
-  <!-- Manifest -->
-  <link rel="manifest" href="manifest.json">
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: color 0.2s ease;
+        }
 
-  <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background: #000000;
-    }
+        /* --- LAYOUT UTILITIES --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%;
+        }
 
-    /* Simple white circular loader */
-    .loader {
-      width: 40px;
-      height: 40px;
-      border: 4px solid rgba(255, 255, 255, 0.2);
-      border-top-color: #ffffff;
-      border-radius: 50%;
-      animation: spin 0.9s linear infinite;
-    }
+        .page-section {
+            display: none;
+            /* Hidden by default, toggled via JS */
+            flex: 1;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.4s ease-out;
+            padding-top: 80px;
+            /* Space for aesthetic balance */
+        }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-  </style>
+        .page-section.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- HERO SECTION (HOME) --- */
+        .hero-content {
+            text-align: center;
+            max-width: 700px;
+            margin-bottom: 60px;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+            margin-bottom: 24px;
+        }
+
+        h1 span {
+            color: var(--primary);
+        }
+
+        p.subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* --- MOBILE SCREENSHOT MOCKUP --- */
+        .mockup-container {
+            position: relative;
+            margin-bottom: 80px;
+            z-index: 1;
+        }
+
+        /* The glowing effect behind the phone */
+        .glow-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 500px;
+            background: var(--primary);
+            filter: blur(120px);
+            opacity: 0.2;
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+ .phone-frame {
+    width: 280px;
+    height: 580px;
+    border-radius: 28px;
+    overflow: hidden;      /* keeps rounded corners */
+    background: #000;
+    padding: 0;            /* ❌ no camera spacing */
+}
+
+.phone-frame::before,
+.phone-frame::after {
+    content: none !important;  /* ❌ removes notch/camera */
+}
+
+.phone-screen {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;     /* full edge-to-edge */
+    display: block;
+}
+
+        /* Placeholder for the actual screenshot image */
+        .screen-content {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .screen-placeholder-text {
+            font-size: 0.9rem;
+            margin-top: 10px;
+            color: var(--primary);
+        }
+
+        /* Icon inside the screen placeholder */
+        .screen-icon {
+            width: 48px;
+            height: 48px;
+            border: 2px solid var(--surface-color);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+        }
+
+        /* --- CONTENT PAGES (Privacy / Terms) --- */
+        .text-page {
+            align-items: flex-start !important;
+            /* Override center alignment */
+            text-align: left;
+            max-width: 800px;
+            margin: 0 auto;
+            padding-bottom: 60px;
+        }
+
+        .text-page h2 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: var(--text-main);
+        }
+
+        .text-page h3 {
+            font-size: 1.5rem;
+            margin-top: 40px;
+            margin-bottom: 16px;
+            color: var(--primary);
+        }
+
+        .text-page p {
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            line-height: 1.7;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 40px;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .back-link:hover {
+            color: var(--primary-touch);
+            text-decoration: underline;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            margin-top: auto;
+            /* Pushes footer to bottom */
+            border-top: 1px solid var(--border-color);
+            padding: 40px 0;
+            background-color: var(--bg-color);
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .footer-nav {
+            display: flex;
+            gap: 32px;
+        }
+
+        .footer-nav a {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .footer-nav a:hover {
+            color: var(--primary);
+        }
+
+        .copyright {
+            font-size: 0.8rem;
+            color: #4a4a4a;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.8rem;
+            }
+
+            .phone-frame {
+                width: 260px;
+                height: 520px;
+            }
+
+            .footer-nav {
+                gap: 20px;
+            }
+
+            .page-section {
+                padding-top: 40px;
+            }
+        }
+
+    </style>
 </head>
 
 <body>
-  <div class="loader"></div>
 
-  <script src="flutter_bootstrap.js" async></script>
+    <!-- === HOME PAGE SECTION === -->
+    <section id="home" class="page-section active">
+        <div class="container" style="display: flex; flex-direction: column; align-items: center;">
 
-  <script>
-    window.addEventListener('flutter-first-frame', function () {
-      const loader = document.querySelector('.loader');
-      if (loader) {
-        loader.style.transition = 'opacity 0.4s ease';
-        loader.style.opacity = '0';
-        setTimeout(() => loader.remove(), 400);
-      }
-    });
-  </script>
+            <div class="hero-content">
+                <h1>Build Better <br><span>Habits.</span></h1>
+                <p class="subtitle">A minimal, distraction-free tracker designed to help you stay consistent and achieve
+                    your goals every single day.</p>
+            </div>
+
+    <div class="mockup-container">
+        <div class="glow-effect"></div>
+    
+        <div class="phone-frame">
+            <img src="assets/habitbud_dasboard.png" alt="HabitBud Dashboard Screenshot" class="phone-screen" />
+        </div>
+    </div>
+    </section>
+
+    <!-- === PRIVACY POLICY SECTION === -->
+    <section id="privacy" class="page-section">
+        <div class="container text-page">
+            <a href="#home" class="back-link">← Back to Home</a>
+            <h2>Privacy Policy</h2>
+            <p>Last updated: December 2024</p>
+
+            <h3>1. Introduction</h3>
+            <p>Welcome to our Habit Tracker app. We respect your privacy and are committed to protecting your personal
+                data. This privacy policy will inform you as to how we look after your personal data when you visit our
+                website or use our application.</p>
+
+            <h3>2. Data Collection</h3>
+            <p>We believe in data minimization. We do not collect any personal data that isn't absolutely necessary for
+                the functioning of the app. Your habit data is stored locally on your device unless you explicitly
+                opt-in for cloud sync features.</p>
+
+            <h3>3. Contact Us</h3>
+            <p>If you have any questions about this privacy policy, please contact us at support@example.com.</p>
+        </div>
+    </section>
+
+    <!-- === TERMS OF USE SECTION === -->
+    <section id="terms" class="page-section">
+        <div class="container text-page">
+            <a href="#home" class="back-link">← Back to Home</a>
+            <h2>Terms of Use</h2>
+
+            <h3>1. Acceptance of Terms</h3>
+            <p>By accessing and using this application, you accept and agree to be bound by the terms and provision of
+                this agreement.</p>
+
+            <h3>2. Use License</h3>
+            <p>Permission is granted to temporarily download one copy of the materials (information or software) on
+                Habit Tracker's website for personal, non-commercial transitory viewing only.</p>
+
+            <h3>3. Disclaimer</h3>
+            <p>The materials on Habit Tracker's website are provided on an 'as is' basis. Habit Tracker makes no
+                warranties, expressed or implied, and hereby disclaims and negates all other warranties including,
+                without limitation, implied warranties or conditions of merchantability.</p>
+        </div>
+    </section>
+
+    <!-- === FOOTER === -->
+    <footer>
+        <div class="container footer-content">
+            <nav class="footer-nav">
+                <!-- Using mailto for contact -->
+                <a href="mailto:contact@habittracker.com">Contact</a>
+                <!-- Hash links trigger the JavaScript router below -->
+                <a href="#privacy">Privacy Policy</a>
+                <a href="#terms">Terms of Use</a>
+            </nav>
+            <div class="copyright">
+                &copy; 2024 Habit Tracker. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- === JAVASCRIPT ROUTER === -->
+    <script>
+        // Simple Hash-Based Router to handle navigation within a single file
+        function handleNavigation() {
+            const hash = window.location.hash || '#home';
+
+            // Hide all sections
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show target section based on hash
+            if (hash === '#privacy') {
+                document.getElementById('privacy').classList.add('active');
+                window.scrollTo(0, 0);
+            } else if (hash === '#terms') {
+                document.getElementById('terms').classList.add('active');
+                window.scrollTo(0, 0);
+            } else {
+                // Default to home for '#home' or empty hash
+                document.getElementById('home').classList.add('active');
+            }
+        }
+
+        // Listen for hash changes (clicking links)
+        window.addEventListener('hashchange', handleNavigation);
+
+        // Handle initial load
+        window.addEventListener('DOMContentLoaded', handleNavigation);
+    </script>
 </body>
+
 </html>
